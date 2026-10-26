@@ -7,10 +7,11 @@ SHELL ["/bin/bash", "-c"]
 # security backports (7.4.33-31 of 21 Oct 2026 adds "Avoid state corruption via bailout" on top of 160+
 # earlier patches), so this image installs PHP from packages.sury.org instead of building the unpatched
 # upstream tarball. Rebuilding the image picks up newer package revisions and Debian security updates.
-ARG SURY_KEY_FINGERPRINT=15058500A0235D97F5D10063B188E2B695BD4743
+ARG SURY_REPO_FINGERPRINT=15058500A0235D97F5D10063B188E2B695BD4743
 ARG PHP_MIN_PACKAGE_VERSION=1:7.4.33-31
 
-RUN addgroup --gid 1000 propeller && useradd --system -u 1000 -g propeller propeller
+# groupadd/useradd from the essential passwd package: trixie-slim has no adduser wrapper
+RUN groupadd --gid 1000 propeller && useradd --system --uid 1000 --gid propeller propeller
 
 ENV PROVISION_CONTEXT="production"
 ENV DEBIAN_FRONTEND=noninteractive
@@ -57,7 +58,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates curl gnupg && \
     curl -fsSL https://packages.sury.org/php/apt.gpg -o /usr/share/keyrings/deb.sury.org-php.gpg && \
-    gpg --show-keys --with-fingerprint /usr/share/keyrings/deb.sury.org-php.gpg | tr -d ' ' | grep -q "^${SURY_KEY_FINGERPRINT}$" \
+    gpg --show-keys --with-fingerprint /usr/share/keyrings/deb.sury.org-php.gpg | tr -d ' ' | grep -q "^${SURY_REPO_FINGERPRINT}$" \
         || { echo "unexpected packages.sury.org key fingerprint"; exit 1; } && \
     echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ trixie main" > /etc/apt/sources.list.d/php.list && \
     rm -rf /var/lib/apt/lists/*
