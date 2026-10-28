@@ -1,5 +1,11 @@
 # php7.4-apache
 
+> **Branch `fpm`:** dieses Repository baut hier das PHP-FPM-Image `ghcr.io/pjirlip/php7.4-fpm` (`Dockerfile`,
+> `php7.4-fpm` aus packages.sury.org, Pool unter `/etc/php/7.4/fpm/pool.d/`). Der Apache-Container ist für alle
+> PHP-Versionen derselbe, `ghcr.io/pjirlip/httpd` aus dem Repository `php8.2` (event-MPM + mod_proxy_fcgi, ohne
+> PHP). Aufbau, Pool-Dimensionierung, Probes und Deployment-Skelett sind im README von `php8.2` (Abschnitt
+> "Apache + PHP-FPM") beschrieben. `php7.4-apache:latest` bleibt bis zum Merge unverändert.
+
 Dockerimage für Hosting von Legacy-Seiten mit PHP 7.4 (Apache prefork + mod_php), gleiche Konfiguration,
 gleiche Umgebungsvariablen und gleiches Betriebsmodell wie `php8.2-apache`.
 

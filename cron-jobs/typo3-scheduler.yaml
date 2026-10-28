@@ -26,7 +26,7 @@ spec:
             runAsGroup: 1000
           containers:
             - name: scheduler
-              image: ghcr.io/pjirlip/php7.4-apache:latest
+              image: ghcr.io/pjirlip/php7.4-fpm:latest
               workingDir: /var/www/html
               command: ["php", "-d", "memory_limit=256M", "typo3/sysext/core/bin/typo3", "scheduler:run"]
               env:
