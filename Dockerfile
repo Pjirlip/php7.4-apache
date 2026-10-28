@@ -133,7 +133,7 @@ RUN sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' /etc/apache2/envva
 RUN (ssh-keyscan -T 5 -H gitlab.propeller.de atum.propeller.de >> /etc/ssh/ssh_known_hosts || true)
 
 # Generate and set Locale
-RUN locale-gen
+RUN locale-gen && locale -a | grep -qi "^en_US.utf8$"
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
