@@ -4,13 +4,14 @@
 #
 # PHP 7.4 is end-of-life upstream: no official php:7.4 image carries the fixes for CVE-2026-109618/109619.
 # Ondřej Surý's Debian packages do (7.4.33-31 of 21 Oct 2026, 160+ backports), so PHP comes from
-# packages.sury.org instead of an unpatched upstream tarball. Rebuilding picks up newer revisions.
+# packages.sury.org instead of an unpatched upstream tarball. 7.4.33-36 of 17 Nov 2026 adds the backports
+# of the security release of 19 Nov 2026 (CVE-2026-129289 in php-fpm, CVE-2026-115560 and others).
 FROM debian:trixie-slim
 LABEL maintainer="Philipp Dippel <philipp.dippel@propeller.de>"
 SHELL ["/bin/bash", "-c"]
 
 ARG SURY_REPO_FINGERPRINT=15058500A0235D97F5D10063B188E2B695BD4743
-ARG PHP_MIN_PACKAGE_VERSION=1:7.4.33-31
+ARG PHP_MIN_PACKAGE_VERSION=1:7.4.33-36
 
 # groupadd/useradd from the essential passwd package: trixie-slim has no adduser wrapper
 RUN groupadd --gid 1000 propeller && useradd --system --uid 1000 --gid propeller propeller
@@ -65,8 +66,9 @@ RUN apt-get update && \
     echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ trixie main" > /etc/apt/sources.list.d/php.list && \
     rm -rf /var/lib/apt/lists/*
 
-# PHP 7.4 FPM + CLI with the extension set of the previous php7.4-apache image, plus tooling
-RUN apt-get update && \
+# PHP 7.4 FPM + CLI with the extension set of the previous php7.4-apache image, plus tooling. The echo ties
+# the layer to PHP_MIN_PACKAGE_VERSION: raising it rebuilds the layer instead of reusing a cached one.
+RUN echo "php7.4 packages, at least ${PHP_MIN_PACKAGE_VERSION}" && apt-get update && \
     apt-get install -y --no-install-recommends \
         php7.4-fpm \
         php7.4-cli \
@@ -100,7 +102,7 @@ RUN apt-get update && \
         mailutils && \
     rm -rf /var/lib/apt/lists/*
 
-# Build-time guard: the installed package revision has to contain the CVE-2026-109618/109619 backport
+# Build-time guard: the installed package revision has to contain the security backports named above
 RUN v="$(dpkg-query -W -f='${Version}' php7.4-cli)" && \
     { dpkg --compare-versions "$v" ge "$PHP_MIN_PACKAGE_VERSION" || { echo "php7.4-cli $v is older than $PHP_MIN_PACKAGE_VERSION"; exit 1; }; } && \
     echo "php7.4-cli $v"
